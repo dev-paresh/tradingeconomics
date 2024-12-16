@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDP and Financial Indicators Comparison</title>
+    <style>
+         body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+            background: linear-gradient(to left, #9ca3a0, #b6b6bd);
+            color: #333;
+        }
+
+        h3 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        #logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+            color: #73777a;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        form {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            width: 200px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f4f4f4;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        #chart {
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="logo">Trading <span style="color: #ccc;">Economics</span></div>
+    <h3>Compare GDP and Auto Exports </h3>
+    <form id="comparison-form">
+        <!-- <input type="text" id="country1" placeholder="First country (e.g., United States)" required> -->
+        <label for="country1">Select Country 1:</label>
+        <select id="country1" required>
+            <option value="Sweden">Sweden</option>
+            <option value="Mexico">Mexico</option>
+            <option value="New Zealand">New Zealand</option>
+            <option value="Thailand">Thailand</option>
+        </select>
+        <br>
+        <label for="country2">Select Country 2:</label>
+        <select id="country2" required>
+            <option value="Sweden">Sweden</option>
+            <option value="Mexico">Mexico</option>
+            <option value="New Zealand">New Zealand</option>
+            <option value="Thailand">Thailand</option>
+        </select>
+        <br>
+        <label for="indicator">Choose an option:</label>
+        <select id="indicator" name="indicator">
+            <option value="GDP">GDP</option>
+            <option value="Auto Exports">Auto Exports</option>
+        </select>
+        <button type="submit">Compare</button>
+    </form>
+
+    <canvas id="chart"></canvas>
+    <div id="result"></div>
+
+    <table id="gdpTable">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th id="country1Header">Country 1</th>
+                <th id="country2Header">Country 2</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+  
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const API_KEY = '9a0ae7a1a0fd494:5mattnd3a3h1xct'; 
+        const BASE_URL = 'https://api.tradingeconomics.com/';
+
+        document.getElementById('comparison-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const country1 = document.getElementById('country1').value.trim();
+            const country2 = document.getElementById('country2').value.trim();
+            const indicator = document.getElementById('indicator').value.trim();
+
+            if (!country1 || !country2 || !indicator) {
+                alert('Please fill out all fields.');
+                return;
+            }
+
+            const url = `${BASE_URL}historical/country/${country1},${country2}/indicator/${indicator}?c=${API_KEY}`;
+            console.log('Fetching data from:', url);
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Client ${API_KEY}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch data: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Received data:', data);
+
+                if (data.length === 0) {
+                    document.getElementById('result').innerHTML = `<p>No data found for the specified countries or indicator.</p>`;
+                    return;
+                }
+
+                updateTable(data, country1, country2);
+                plotChart(data, country1, country2, indicator);
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('result').innerHTML = `<p>Error fetching data: ${error.message}</p>`;
+            }
+        });
+
+        function updateTable(data, country1, country2) {
+            const tableBody = document.getElementById('tableBody');
+            const country1Header = document.getElementById('country1Header');
+            const country2Header = document.getElementById('country2Header');
+
+            country1Header.textContent = country1;
+            country2Header.textContent = country2;
+
+            tableBody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.DateTime.split('-')[0]}</td>
+                    <td>${item.Value ? item.Value.toLocaleString() : 'N/A'}</td>
+                    <td>${item.Country === country2 ? item.Value.toLocaleString() : 'N/A'}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        let chartInstance = null;
+
+        function plotChart(data, country1, country2, indicator) {
+            const chartCanvas = document.getElementById('chart');
+            const ctx = chartCanvas.getContext('2d');
+
+            const labels = data.map(item => item.DateTime.split('-')[0]);
+            const country1Values = data.filter(item => item.Country === country1).map(item => item.Value);
+            const country2Values = data.filter(item => item.Country === country2).map(item => item.Value);
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: `${country1} (${indicator})`,
+                    data: country1Values,
+                    backgroundColor: 'rgba(0, 123, 255, 0.6)', 
+                    borderColor: 'blue',
+                    borderWidth: 1
+                },
+                {
+                    label: `${country2} (${indicator})`,
+                    data: country2Values,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)', 
+                    borderColor: 'red',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+        }
+    </script>
+</body>
+
+</html>
