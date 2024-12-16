@@ -1,44 +1,31 @@
+# Economic Indicator Comparison
 
-### Introduction
+This repository contains a project that compares various economic indicators. Follow the instructions below to clone the repository, navigate to the project directory, and open it in your browser using Visual Studio Code with the Live Server extension or else you can watch it live by clicking the live link also .
 
-The Trading Economics API provides you with direct access to 300.000 economic indicators, exchange rates, stock market indexes, government bond yields and commodity prices. Providing several request methods to query our databases, with samples available in different programming languages, it is the best way to export data in XML, CSV or JSON format. The API can be used to feed a custom developed application, a public website or just off-the-shelf software like Microsoft Excel.
 
-#
+## Clone the Repository
 
-**Documentation**
+To clone the repository, open your terminal and run the following command:
 
-https://docs.tradingeconomics.com/
+```
+git clone https://github.com/dev-paresh/tradingeconomics.git
+```
 
-#
+## Navigate to the Project Directory
 
-**GitHub Examples**
+```
+cd economic-indicator-comparison
+```
+## Open with Live Server
 
-https://github.com/tradingeconomics/tradingeconomics
+1. Open Visual Studio Code.
+2. Open the project folder by selecting File > Open Folder... and choosing the economic-indicator-comparison directory.
+3. Once the folder is open, right-click on the index.html file in the Explorer sidebar.
+4. Select Open with Live Server.
 
-#
+## Visit live website
 
-**Python**
-
-[https://github.com/tradingeconomics/tradingeconomics-python](https://github.com/tradingeconomics/tradingeconomics-python)
-
-#
-
-**Jupyter Notebooks**
-
-https://github.com/tradingeconomics/notebooks
-
-#
-
-**Docker**
-
-https://hub.docker.com/u/tradingeconomics
-
-#
-
-**Learn More**
-
-https://tradingeconomics.com/api/
-
+[Click here to visit the live website](https://tradingeconomics-seven.vercel.app/)
 
 
 
